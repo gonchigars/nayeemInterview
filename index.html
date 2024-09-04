@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scheduling App</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 1000px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        text-align: center;
+      }
+      .tab {
+        display: inline-block;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+      }
+      .tab.active {
+        border-bottom: 2px solid #333;
+        font-weight: bold;
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+      input,
+      button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+      button {
+        background-color: #333;
+        color: white;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #555;
+      }
+      .result {
+        padding: 10px;
+        background-color: #e7e7e7;
+        border-radius: 5px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      table,
+      th,
+      td {
+        border: 1px solid black;
+      }
+      th,
+      td {
+        padding: 10px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Scheduling App</h1>
+      <div class="tabs">
+        <div class="tab active" id="userTab">User Page</div>
+        <div class="tab" id="adminTab">Admin Page</div>
+      </div>
+
+      <!-- User Tab Content -->
+      <div id="userContent" class="tab-content active">
+        <h2>User Availability</h2>
+        <input type="email" id="userEmail" placeholder="Enter your email" />
+        <input type="datetime-local" id="availStart" placeholder="Start Time" />
+        <input type="datetime-local" id="availEnd" placeholder="End Time" />
+        <input
+          type="number"
+          id="availDuration"
+          placeholder="Duration (minutes)"
+        />
+        <button onclick="createUserAvailability()">Submit Availability</button>
+
+        <h3>Your Availability</h3>
+        <div id="userAvailability"></div>
+      </div>
+
+      <!-- Admin Tab Content -->
+      <div id="adminContent" class="tab-content">
+        <h2>Admin Dashboard</h2>
+        <button onclick="fetchAllAvailability()">View All Availability</button>
+
+        <h3>Schedule a Session</h3>
+        <input
+          type="email"
+          id="sessionUserEmail"
+          placeholder="User's Email (for scheduling)"
+        />
+        <input
+          type="datetime-local"
+          id="sessionStart"
+          placeholder="Start Time"
+        />
+        <input type="datetime-local" id="sessionEnd" placeholder="End Time" />
+        <input
+          type="text"
+          id="sessionAttendees"
+          placeholder="Participants (comma-separated emails)"
+        />
+        <button onclick="scheduleSession()">Schedule Session</button>
+
+        <h3>All Users Availability</h3>
+        <div id="allAvailability"></div>
+
+        <h3>All Scheduled Sessions</h3>
+        <div id="adminSessions"></div>
+      </div>
+    </div>
+
+    <script>
+      // Handling Tabs
+      const userTab = document.getElementById("userTab");
+      const adminTab = document.getElementById("adminTab");
+      const userContent = document.getElementById("userContent");
+      const adminContent = document.getElementById("adminContent");
+
+      userTab.addEventListener("click", () => {
+        userTab.classList.add("active");
+        adminTab.classList.remove("active");
+        userContent.classList.add("active");
+        adminContent.classList.remove("active");
+      });
+
+      adminTab.addEventListener("click", () => {
+        adminTab.classList.add("active");
+        userTab.classList.remove("active");
+        adminContent.classList.add("active");
+        userContent.classList.remove("active");
+      });
+
+      const API_URL = "http://localhost:8080/api"; // Adjust as necessary
+
+      // Function to create a user
+      async function createUser(email) {
+        try {
+          const response = await fetch(`${API_URL}/users/create`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email: email }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Error creating user.");
+          }
+
+          alert("User created successfully!");
+        } catch (error) {
+          console.error("User creation failed", error);
+        }
+      }
+
+      // Function to check if the user exists before creating availability
+      async function createUserAvailability() {
+        const email = document.getElementById("userEmail").value;
+        const start = document.getElementById("availStart").value;
+        const end = document.getElementById("availEnd").value;
+        const duration = document.getElementById("availDuration").value;
+
+        try {
+          // Step 1: Check if the user exists
+          let userResponse = await fetch(`${API_URL}/users/${email}`);
+          if (userResponse.status === 404) {
+            // Step 2: If user does not exist, create the user
+            await createUser(email);
+          }
+
+          // Step 3: Submit the availability
+          const availability = {
+            user: email,
+            start: start,
+            end: end,
+            duration: parseInt(duration),
+          };
+
+          const response = await fetch(`${API_URL}/availability/create`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(availability),
+          });
+
+          if (!response.ok) {
+            throw new Error("Error creating availability.");
+          }
+
+          const result = await response.json();
+          alert("Availability submitted successfully!");
+          renderUserAvailability(email); // Fetch and render the user's availability
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      // Function to render user availability
+      async function renderUserAvailability(email) {
+        try {
+          const response = await fetch(`${API_URL}/availability/${email}`);
+          const data = await response.json();
+          let html =
+            "<table><tr><th>Start</th><th>End</th><th>Duration</th></tr>";
+
+          data.forEach((avail) => {
+            html += `<tr><td>${avail.start}</td><td>${avail.endTime}</td><td>${avail.duration} mins</td></tr>`;
+          });
+          html += "</table>";
+          document.getElementById("userAvailability").innerHTML = html;
+        } catch (error) {
+          console.error(error);
+          document.getElementById("userAvailability").innerHTML =
+            "Error loading availability.";
+        }
+      }
+
+      // Function to fetch and display all availability for the admin
+      async function fetchAllAvailability() {
+        try {
+          const response = await fetch(`${API_URL}/availability/all`);
+          const data = await response.json();
+          let html =
+            "<table><tr><th>User</th><th>Start</th><th>End</th><th>Duration</th></tr>";
+
+          data.forEach((avail) => {
+            html += `<tr><td>${avail.user.email}</td><td>${avail.start}</td><td>${avail.endTime}</td><td>${avail.duration} mins</td></tr>`;
+          });
+          html += "</table>";
+          document.getElementById("allAvailability").innerHTML = html;
+        } catch (error) {
+          console.error(error);
+          document.getElementById("allAvailability").innerHTML =
+            "Error fetching availability.";
+        }
+      }
+
+      // Function to schedule a session
+      async function scheduleSession() {
+        const userEmail = document.getElementById("sessionUserEmail").value;
+        const start = document.getElementById("sessionStart").value;
+        const end = document.getElementById("sessionEnd").value;
+        const attendees = document
+          .getElementById("sessionAttendees")
+          .value.split(",")
+          .map((email) => email.trim());
+
+        const session = {
+          startTime: start,
+          endTime: end,
+          participants: attendees,
+        };
+
+        try {
+          const response = await fetch(`${API_URL}/sessions/create`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(session),
+          });
+
+          if (!response.ok) {
+            throw new Error("Error scheduling session.");
+          }
+
+          const result = await response.json();
+          alert("Session scheduled successfully!");
+          renderAdminSessions(); // Fetch and render the admin sessions
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      // Function to render admin sessions
+      async function renderAdminSessions() {
+        try {
+          const response = await fetch(`${API_URL}/sessions/all`);
+          const data = await response.json();
+          let html =
+            "<table><tr><th>User</th><th>Start</th><th>End</th><th>Attendees</th></tr>";
+
+          data.forEach((session) => {
+            html += `<tr><td>${session.startTime}</td><td>${
+              session.endTime
+            }</td><td>${session.participants
+              .map((participant) => participant.email)
+              .join(", ")}</td></tr>`;
+          });
+          html += "</table>";
+          document.getElementById("adminSessions").innerHTML = html;
+        } catch (error) {
+          console.error(error);
+          document.getElementById("adminSessions").innerHTML =
+            "Error fetching sessions.";
+        }
+      }
+    </script>
+  </body>
+</html>
