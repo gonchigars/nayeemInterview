@@ -9,11 +9,11 @@
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
-        background-color: #f4f4f4;
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
+        background-color: #f4f4f4;
       }
 
       .container {
@@ -50,166 +50,141 @@
         background-color: #218838;
       }
 
-      #register-status,
-      #login-status,
-      #schedule-status {
-        color: red;
+      .message {
         text-align: center;
+        margin-bottom: 10px;
+        color: red;
       }
 
-      #schedule-section {
-        margin-top: 20px;
+      #available-time-section {
         display: none;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>Dynamic User Availability System</h1>
+      <h1>User Availability System</h1>
 
-      <!-- Register User Section -->
+      <!-- Register Section -->
       <div id="register-section">
         <h2>Register</h2>
-        <form id="register-form">
-          <input
-            type="email"
-            id="register-email"
-            placeholder="Enter email"
-            required
-          />
-          <input
-            type="password"
-            id="register-password"
-            placeholder="Enter password"
-            required
-          />
-          <button type="submit">Register</button>
-        </form>
-        <div id="register-status"></div>
+        <input
+          type="email"
+          id="register-email"
+          placeholder="Enter email"
+          required
+        />
+        <button onclick="registerUser()">Register</button>
+        <div class="message" id="register-message"></div>
       </div>
 
-      <!-- Login User Section -->
+      <!-- Login Section -->
       <div id="login-section">
         <h2>Login</h2>
-        <form id="login-form">
-          <input
-            type="email"
-            id="login-email"
-            placeholder="Enter email"
-            required
-          />
-          <input
-            type="password"
-            id="login-password"
-            placeholder="Enter password"
-            required
-          />
-          <button type="submit">Login</button>
-        </form>
-        <div id="login-status"></div>
+        <input
+          type="email"
+          id="login-email"
+          placeholder="Enter email"
+          required
+        />
+        <button onclick="loginUser()">Login</button>
+        <div class="message" id="login-message"></div>
       </div>
 
-      <!-- Update Schedule Section -->
-      <div id="schedule-section">
-        <h2>Update Schedule</h2>
-        <form id="schedule-form">
-          <input type="datetime-local" id="start-time" required />
-          <input type="datetime-local" id="end-time" required />
-          <button type="submit">Update Schedule</button>
-        </form>
-        <div id="schedule-status"></div>
+      <!-- Available Time Section -->
+      <div id="available-time-section">
+        <h2>Post Available Time</h2>
+        <label>Start Time</label>
+        <input type="datetime-local" id="start-time" />
+        <label>End Time</label>
+        <input type="datetime-local" id="end-time" />
+        <button onclick="postAvailableTime()">Post Time</button>
+        <div class="message" id="time-message"></div>
       </div>
     </div>
 
     <script>
-      // Base URL for the API
-      const baseUrl = "http://localhost:8080";
-
-      // Helper function to make API requests
-      async function apiRequest(endpoint, method, data) {
-        try {
-          const response = await fetch(`${baseUrl}${endpoint}`, {
-            method,
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-          });
-
-          return await response.json();
-        } catch (error) {
-          console.error("Error:", error);
-          return { error: "Network Error" };
-        }
-      }
+      const apiUrl = "http://localhost:8080/api/users";
+      let loggedInUserEmail = "";
 
       // Register User
-      document
-        .getElementById("register-form")
-        .addEventListener("submit", async function (e) {
-          e.preventDefault();
-          const email = document.getElementById("register-email").value;
-          const password = document.getElementById("register-password").value;
-
-          const data = { email, password };
-          const result = await apiRequest("/register", "POST", data);
-
-          const statusElement = document.getElementById("register-status");
-          if (result.success) {
-            statusElement.textContent = "User registered successfully!";
-            statusElement.style.color = "green";
-          } else {
-            statusElement.textContent =
-              "Registration failed: " + (result.error || "Unknown error");
-            statusElement.style.color = "red";
-          }
-        });
+      function registerUser() {
+        const email = document.getElementById("register-email").value;
+        fetch(`${apiUrl}/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        })
+          .then((response) => response.text())
+          .then((message) => {
+            document.getElementById("register-message").textContent = message;
+            if (message.includes("User registered")) {
+              document.getElementById("register-message").style.color = "green";
+            } else {
+              document.getElementById("register-message").style.color = "red";
+            }
+          })
+          .catch((error) => {
+            document.getElementById("register-message").textContent =
+              "Registration failed";
+          });
+      }
 
       // Login User
-      document
-        .getElementById("login-form")
-        .addEventListener("submit", async function (e) {
-          e.preventDefault();
-          const email = document.getElementById("login-email").value;
-          const password = document.getElementById("login-password").value;
+      function loginUser() {
+        const email = document.getElementById("login-email").value;
+        fetch(`${apiUrl}/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        })
+          .then((response) => response.text())
+          .then((message) => {
+            document.getElementById("login-message").textContent = message;
+            if (message.includes("Login successful")) {
+              document.getElementById("login-message").style.color = "green";
+              loggedInUserEmail = email;
+              document.getElementById("available-time-section").style.display =
+                "block";
+            } else {
+              document.getElementById("login-message").style.color = "red";
+              document.getElementById("available-time-section").style.display =
+                "none";
+            }
+          })
+          .catch((error) => {
+            document.getElementById("login-message").textContent =
+              "Login failed";
+          });
+      }
 
-          const data = { email, password };
-          const result = await apiRequest("/login", "POST", data);
-
-          const statusElement = document.getElementById("login-status");
-          if (result.success) {
-            statusElement.textContent = "Login successful!";
-            statusElement.style.color = "green";
-            document.getElementById("schedule-section").style.display = "block";
-          } else {
-            statusElement.textContent =
-              "Login failed: " + (result.error || "Unknown error");
-            statusElement.style.color = "red";
-            document.getElementById("schedule-section").style.display = "none";
-          }
-        });
-
-      // Update Schedule
-      document
-        .getElementById("schedule-form")
-        .addEventListener("submit", async function (e) {
-          e.preventDefault();
-          const start = document.getElementById("start-time").value;
-          const end = document.getElementById("end-time").value;
-
-          const data = { start, end };
-          const result = await apiRequest("/schedule/update", "POST", data);
-
-          const statusElement = document.getElementById("schedule-status");
-          if (result.success) {
-            statusElement.textContent = "Schedule updated successfully!";
-            statusElement.style.color = "green";
-          } else {
-            statusElement.textContent =
-              "Update failed: " + (result.error || "Unknown error");
-            statusElement.style.color = "red";
-          }
-        });
+      // Post Available Time
+      function postAvailableTime() {
+        const startTime = document.getElementById("start-time").value;
+        const endTime = document.getElementById("end-time").value;
+        fetch(`${apiUrl}/available-time`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: loggedInUserEmail,
+            start: startTime,
+            end: endTime,
+          }),
+        })
+          .then((response) => response.text())
+          .then((message) => {
+            document.getElementById("time-message").textContent = message;
+            if (message.includes("Available time posted")) {
+              document.getElementById("time-message").style.color = "green";
+            } else {
+              document.getElementById("time-message").style.color = "red";
+            }
+          })
+          .catch((error) => {
+            document.getElementById("time-message").textContent =
+              "Posting time failed";
+          });
+      }
     </script>
   </body>
 </html>

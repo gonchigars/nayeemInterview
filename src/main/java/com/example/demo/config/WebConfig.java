@@ -1,3 +1,5 @@
+// Path: C:\Users\gonch\Downloads\backendTitan6-sql-2-jpa\backendTitan6-sql-2-jpa\src\main\java\com\example\demo\config\WebConfig.java
+
 package com.example.demo.config;
 
 import org.springframework.context.annotation.Bean;

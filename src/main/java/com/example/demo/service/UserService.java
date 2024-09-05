@@ -1,3 +1,4 @@
+
 package com.example.demo.service;
 
 import com.example.demo.model.User;
@@ -23,11 +24,11 @@ public class UserService {
 
     // Create user method
     public User createUser(String email) {
-        // Ensure the user does not already exist
+        // Check if the user already exists
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new RuntimeException("User already exists");
+            throw new UserAlreadyExistsException("User already exists with email: " + email);
         }
-        
+    
         // Create and save new user
         User newUser = new User(email);
         return userRepository.save(newUser);
