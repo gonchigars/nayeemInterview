@@ -1,8 +1,10 @@
 -- Insert some users
-INSERT INTO users (id, email) VALUES (1, 'user1@example.com');
-INSERT INTO users (id, email) VALUES (2, 'user2@example.com');
-INSERT INTO users (id, email) VALUES (3, 'user3@example.com');
-INSERT INTO users (id, email) VALUES (4, 'admin@example.com');
+-- Insert some users without specifying the id
+INSERT INTO users (email) VALUES ('user1@example.com');
+INSERT INTO users (email) VALUES ('user2@example.com');
+INSERT INTO users (email) VALUES ('user3@example.com');
+INSERT INTO users (email) VALUES ('admin@example.com');
+
 
 -- Insert availability slots for the users
 -- User 1 availability: Monday 10:00 AM - 1:00 PM and 4:00 PM - 6:00 PM

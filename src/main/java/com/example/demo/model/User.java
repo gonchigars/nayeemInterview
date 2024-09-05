@@ -10,7 +10,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String email;  // Use email as a unique identifier
+    @Column(unique = true)  // Enforce uniqueness of the email field
+    private String email;
 
     // Constructors
     public User() {}
