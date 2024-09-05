@@ -11,13 +11,17 @@ import java.util.Map;
 import java.util.HashMap;
 
 @RestController
+//what is restcontroller
 @RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
+//what is Autowired. Why it is used, how it works..
     private UserService userService;
 
     @PostMapping("/create")
+    //need clarity on <User> why use it..
+    //@RequestBody Map<String, String> userData
     public ResponseEntity<User> createUser(@RequestBody Map<String, String> userData) {
         User user = userService.createUser(userData.get("email"));
         return ResponseEntity.ok(user);

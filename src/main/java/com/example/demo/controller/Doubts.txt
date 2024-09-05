@@ -1,4 +1,3 @@
-Let's break down each concept step by step using the Feynman technique, which means we'll explain it in a simple, easy-to-understand way. 
 
 ### 1. **`@RestController`**
 
@@ -66,5 +65,3 @@ Let's break down each concept step by step using the Feynman technique, which me
 - `@Autowired`: Automatically injects dependencies (like `userService`) into the class, saving the need to manually create instances.
 - `ResponseEntity<User>`: A way to send back both the HTTP response status and the user object in the response body.
 - `@RequestBody`: Automatically binds the incoming request body to a method parameter, like a map or object.
-
-By explaining each concept in a simple way, you get a clear picture of how each part of the code works.
