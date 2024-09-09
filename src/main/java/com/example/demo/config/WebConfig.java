@@ -1,5 +1,3 @@
-// Path: C:\Users\gonch\Downloads\backendTitan6-sql-2-jpa\backendTitan6-sql-2-jpa\src\main\java\com\example\demo\config\WebConfig.java
-
 package com.example.demo.config;
 
 import org.springframework.context.annotation.Bean;
@@ -15,9 +13,9 @@ public class WebConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:8080", "null")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE")
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:3000")  // Allow your frontend origin
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }

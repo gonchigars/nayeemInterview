@@ -23,7 +23,7 @@ For your assignment using a SQL database, here’s a breakdown of the database t
 5. **Roles Table** (optional, if you need more granular user roles):
    - Fields: `id`, `role_name`.
 
-You will at least need 4 tables (Users, Availability, Sessions, and Session_Attendees) to meet the core functionality requirements.
+You will at least need 4 tables (Users, Availability, Sessions, and Notification table to meet the core functionality requirements.
 
 ========================
 Basic Test cases

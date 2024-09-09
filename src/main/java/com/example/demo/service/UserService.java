@@ -1,4 +1,3 @@
-
 package com.example.demo.service;
 
 import com.example.demo.model.User;
@@ -14,23 +13,22 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public Optional<User> getUserByEmail(String email) {
-        Optional<User> user = userRepository.findByEmail(email);
-        if (user.isEmpty()) {
-            throw new RuntimeException("User not found");
-        }
-        return user;
+    public User registerUser(User user) {
+        // Storing the password as-is without encoding
+        return userRepository.save(user);
     }
 
-    // Create user method
-    public User createUser(String email) {
-        // Check if the user already exists
-        if (userRepository.findByEmail(email).isPresent()) {
-            throw new UserAlreadyExistsException("User already exists with email: " + email);
+    public boolean authenticate(String email, String password) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            // Comparing raw password with stored password
+            return password.equals(user.getPassword());
         }
-    
-        // Create and save new user
-        User newUser = new User(email);
-        return userRepository.save(newUser);
+        return false;
+    }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
     }
 }
