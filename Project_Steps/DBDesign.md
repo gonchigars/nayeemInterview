@@ -12,20 +12,15 @@ For your assignment using a SQL database, here’s a breakdown of the database t
 
 3. **Sessions Table**:
 
-   - Stores scheduled sessions and their details.
-   - Fields: `id`, `admin_id` (foreign key to Users), `start_time`, `end_time`, `session_type` (one-on-one or group).
+   - Stores scheduled sessions and their details. (Overlap, conflicts, etc.)
+   - Fields: `id`, `admin_id` (foreign key to Users),`Availability_id` (Availability key), `start_time`, `end_time`, `session_type` (one-on-one or group).
 
-4. **Session_Attendees Table**:
-
-   - Tracks the attendees of a session.
-   - Fields: `session_id` (foreign key to Sessions), `user_id` (foreign key to Users), `status` (attended, cancelled, etc.).
-
-5. **Notifications Table** (optional, for bonus points):
+4. **Notifications Table** (optional, for bonus points):
 
    - Tracks notifications for rescheduling or cancellation of sessions.
    - Fields: `id`, `user_id` (foreign key to Users), `session_id` (foreign key to Sessions), `notification_type` (email, SMS), `sent_at`.
 
-6. **Roles Table** (optional, if you need more granular user roles):
+5. **Roles Table** (optional, if you need more granular user roles):
    - Fields: `id`, `role_name`.
 
 You will at least need 4 tables (Users, Availability, Sessions, and Session_Attendees) to meet the core functionality requirements.
