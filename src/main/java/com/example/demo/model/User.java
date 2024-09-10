@@ -1,10 +1,19 @@
 package com.example.demo.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "users")
@@ -17,8 +26,8 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
-    private String password;
+   // @Column(nullable = false)
+//rivate String password;
 
     @Column(nullable = false)
     private String role;
@@ -31,9 +40,9 @@ public class User {
 
     public User() {}
 
-    public User(String email, String password, String role) {
+    public User(String email,String role) {
         this.email = email;
-        this.password = password;
+       // this.password = password;
         this.role = role;
     }
 
@@ -53,13 +62,13 @@ public class User {
         this.email = email;
     }
 
-    public String getPassword() {
+    /*public String getPassword() {
         return password;
     }
 
     public void setPassword(String password) {
         this.password = password;
-    }
+    }*/
 
     public String getRole() {
         return role;
