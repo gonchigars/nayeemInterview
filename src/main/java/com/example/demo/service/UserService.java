@@ -24,7 +24,7 @@ public class UserService {
         Optional<User> userOptional = userRepository.findByEmail(email);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            return password.equals(user.getPassword());  // Just comparing passwords here
+          //  return password.equals(user.getPassword());  // Just comparing passwords here
         }
         return false;
     }
