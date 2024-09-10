@@ -3,47 +3,53 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User Availability System</title>
+    <title>Add Employee</title>
     <style>
       body {
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
         background-color: #f4f4f4;
       }
 
       .container {
-        background-color: white;
+        width: 400px;
+        margin: 50px auto;
         padding: 20px;
-        border-radius: 5px;
+        background-color: white;
+        border-radius: 8px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        max-width: 400px;
-        width: 100%;
       }
 
-      h1,
       h2 {
         text-align: center;
       }
 
-      input,
-      button {
+      label {
         display: block;
+        margin-top: 10px;
+        font-weight: bold;
+      }
+
+      input[type="text"],
+      input[type="number"] {
         width: 100%;
-        padding: 10px;
+        padding: 8px;
+        margin-top: 5px;
         margin-bottom: 10px;
         border: 1px solid #ccc;
         border-radius: 4px;
       }
 
       button {
+        width: 100%;
+        padding: 10px;
         background-color: #28a745;
         color: white;
+        border: none;
+        border-radius: 4px;
         cursor: pointer;
+        font-size: 16px;
       }
 
       button:hover {
@@ -51,140 +57,75 @@
       }
 
       .message {
-        text-align: center;
-        margin-bottom: 10px;
-        color: red;
-      }
-
-      #available-time-section {
-        display: none;
+        margin-top: 10px;
+        font-size: 14px;
+        color: #155724;
+        background-color: #d4edda;
+        padding: 10px;
+        border-radius: 4px;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>User Availability System</h1>
+      <h2>Add New Employee</h2>
+      <form id="employeeForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required />
 
-      <!-- Register Section -->
-      <div id="register-section">
-        <h2>Register</h2>
-        <input
-          type="email"
-          id="register-email"
-          placeholder="Enter email"
-          required
-        />
-        <button onclick="registerUser()">Register</button>
-        <div class="message" id="register-message"></div>
-      </div>
+        <label for="department">Department:</label>
+        <input type="text" id="department" name="department" required />
 
-      <!-- Login Section -->
-      <div id="login-section">
-        <h2>Login</h2>
-        <input
-          type="email"
-          id="login-email"
-          placeholder="Enter email"
-          required
-        />
-        <button onclick="loginUser()">Login</button>
-        <div class="message" id="login-message"></div>
-      </div>
+        <label for="salary">Salary:</label>
+        <input type="number" id="salary" name="salary" required />
 
-      <!-- Available Time Section -->
-      <div id="available-time-section">
-        <h2>Post Available Time</h2>
-        <label>Start Time</label>
-        <input type="datetime-local" id="start-time" />
-        <label>End Time</label>
-        <input type="datetime-local" id="end-time" />
-        <button onclick="postAvailableTime()">Post Time</button>
-        <div class="message" id="time-message"></div>
-      </div>
+        <button type="submit">Add Employee</button>
+      </form>
+
+      <div class="message" id="message" style="display: none"></div>
     </div>
 
     <script>
-      const apiUrl = "http://localhost:8080/api/users";
-      let loggedInUserEmail = "";
+      document
+        .getElementById("employeeForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault(); // Prevent form from submitting the usual way
 
-      // Register User
-      function registerUser() {
-        const email = document.getElementById("register-email").value;
-        fetch(`${apiUrl}/register`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        })
-          .then((response) => response.text())
-          .then((message) => {
-            document.getElementById("register-message").textContent = message;
-            if (message.includes("User registered")) {
-              document.getElementById("register-message").style.color = "green";
-            } else {
-              document.getElementById("register-message").style.color = "red";
-            }
-          })
-          .catch((error) => {
-            document.getElementById("register-message").textContent =
-              "Registration failed";
-          });
-      }
+          const name = document.getElementById("name").value;
+          const department = document.getElementById("department").value;
+          const salary = document.getElementById("salary").value;
 
-      // Login User
-      function loginUser() {
-        const email = document.getElementById("login-email").value;
-        fetch(`${apiUrl}/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        })
-          .then((response) => response.text())
-          .then((message) => {
-            document.getElementById("login-message").textContent = message;
-            if (message.includes("Login successful")) {
-              document.getElementById("login-message").style.color = "green";
-              loggedInUserEmail = email;
-              document.getElementById("available-time-section").style.display =
-                "block";
-            } else {
-              document.getElementById("login-message").style.color = "red";
-              document.getElementById("available-time-section").style.display =
-                "none";
-            }
-          })
-          .catch((error) => {
-            document.getElementById("login-message").textContent =
-              "Login failed";
-          });
-      }
+          // Create an employee object
+          const employee = {
+            name: name,
+            department: department,
+            salary: salary,
+          };
 
-      // Post Available Time
-      function postAvailableTime() {
-        const startTime = document.getElementById("start-time").value;
-        const endTime = document.getElementById("end-time").value;
-        fetch(`${apiUrl}/available-time`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: loggedInUserEmail,
-            start: startTime,
-            end: endTime,
-          }),
-        })
-          .then((response) => response.text())
-          .then((message) => {
-            document.getElementById("time-message").textContent = message;
-            if (message.includes("Available time posted")) {
-              document.getElementById("time-message").style.color = "green";
-            } else {
-              document.getElementById("time-message").style.color = "red";
-            }
+          // Send a POST request to the API to add the employee
+          fetch("http://localhost:8080/employees", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(employee),
           })
-          .catch((error) => {
-            document.getElementById("time-message").textContent =
-              "Posting time failed";
-          });
-      }
+            .then((response) => response.json())
+            .then((data) => {
+              // Display a success message
+              document.getElementById("message").innerText =
+                "Employee added successfully!";
+              document.getElementById("message").style.display = "block";
+
+              // Clear the form fields
+              document.getElementById("name").value = "";
+              document.getElementById("department").value = "";
+              document.getElementById("salary").value = "";
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        });
     </script>
   </body>
 </html>
