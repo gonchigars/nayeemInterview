@@ -2,13 +2,13 @@ package com.example.demo.dto;
 
 public class LoginRequest {
     private String email;
-    private String password;
+
 
     public LoginRequest() {}
 
-    public LoginRequest(String email, String password) {
+    public LoginRequest(String email) {
         this.email = email;
-        this.password = password;
+        
     }
 
     // Getters and Setters
@@ -20,11 +20,5 @@ public class LoginRequest {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+   
 }
