@@ -21,7 +21,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<UserResponseDTO> registerUser(@RequestBody UserDTO userDTO) {
         // Convert UserDTO to User entity
-        User user = new User(userDTO.getEmail(), userDTO.getPassword(), userDTO.getRole());
+        User user = new User(userDTO.getEmail(),userDTO.getRole());
 
         // Register the user and get the saved User entity
         User registeredUser = userService.registerUser(user);
@@ -37,7 +37,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody LoginRequestDTO loginRequestDTO) {
-        boolean isAuthenticated = userService.authenticate(loginRequestDTO.getEmail(), loginRequestDTO.getPassword());
+        boolean isAuthenticated = userService.authenticate(loginRequestDTO.getEmail()); //loginRequestDTO.getPassword()
         if (isAuthenticated) {
             return ResponseEntity.ok("Login successful");
         } else {
