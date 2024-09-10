@@ -1,3 +1,4 @@
+// File: src/main/java/com/example/demo/service/UserService.java
 package com.example.demo.service;
 
 import com.example.demo.model.User;
@@ -13,23 +14,27 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public Optional<User> getUserByEmail(String email) {
-        Optional<User> user = userRepository.findByEmail(email);
-        if (user.isEmpty()) {
-            throw new RuntimeException("User not found");
-        }
-        return user;
+    // Register a new user
+    public User registerUser(User user) {
+        return userRepository.save(user);
     }
 
-    // Create user method
-    public User createUser(String email) {
-        // Ensure the user does not already exist
-        if (userRepository.findByEmail(email).isPresent()) {
-            throw new RuntimeException("User already exists");
-        }
-        
-        // Create and save new user
-        User newUser = new User(email);
-        return userRepository.save(newUser);
+    // Authenticate a user by email and password
+<<<<<<< HEAD
+    // public boolean authenticate(String email, String password) {
+    //     Optional<User> userOptional = userRepository.findByEmail(email);
+    //     if (userOptional.isPresent()) {
+    //         User user = userOptional.get();
+    //         return password.equals(user.getPassword());  // Just comparing passwords here
+    //     }
+    //     return false;
+    // }
+
+=======
+    
+>>>>>>> 847d8365a1381f86c3a3300c0ed15f2e7089a0a4
+    // Get a user by ID
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
     }
 }
