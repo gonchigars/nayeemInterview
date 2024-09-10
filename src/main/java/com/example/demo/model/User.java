@@ -31,7 +31,11 @@ public class User {
 
     public User() {}
 
+<<<<<<< HEAD
     public User(String email,  String role) {
+=======
+    public User(String email, String role) {//userDTO.getPassword(),
+>>>>>>> 847d8365a1381f86c3a3300c0ed15f2e7089a0a4
         this.email = email;
         // this.password = password;
         this.role = role;

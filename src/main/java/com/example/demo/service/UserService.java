@@ -20,6 +20,7 @@ public class UserService {
     }
 
     // Authenticate a user by email and password
+<<<<<<< HEAD
     // public boolean authenticate(String email, String password) {
     //     Optional<User> userOptional = userRepository.findByEmail(email);
     //     if (userOptional.isPresent()) {
@@ -29,6 +30,9 @@ public class UserService {
     //     return false;
     // }
 
+=======
+    
+>>>>>>> 847d8365a1381f86c3a3300c0ed15f2e7089a0a4
     // Get a user by ID
     public User getUserById(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));

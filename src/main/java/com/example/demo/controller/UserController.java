@@ -21,7 +21,11 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<UserResponseDTO> registerUser(@RequestBody UserDTO userDTO) {
         // Convert UserDTO to User entity
+<<<<<<< HEAD
         User user = new User(userDTO.getEmail(),userDTO.getRole());
+=======
+        User user = new User(userDTO.getEmail(),  userDTO.getRole());//userDTO.getPassword(),
+>>>>>>> 847d8365a1381f86c3a3300c0ed15f2e7089a0a4
 
         // Register the user and get the saved User entity
         User registeredUser = userService.registerUser(user);
