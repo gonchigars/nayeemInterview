@@ -1,14 +1,18 @@
 package com.example.demo.service;
 
+import com.example.demo.model.Availability;
 import com.example.demo.model.Session;
 import com.example.demo.model.User;
+import com.example.demo.repository.AvailabilityRepository;
 import com.example.demo.repository.SessionRepository;
+import com.example.demo.repository.UserRepository;
+import com.example.demo.dto.SessionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class SessionService {
@@ -16,34 +20,61 @@ public class SessionService {
     @Autowired
     private SessionRepository sessionRepository;
 
-    public Session createSession(LocalDateTime startTime, LocalDateTime endTime, List<User> participants) {
-        Session session = new Session();
-        session.setStartTime(startTime);
-        session.setEndTime(endTime);
-        session.setParticipants(participants);
+    @Autowired
+    private AvailabilityRepository availabilityRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    // Scheduling a session
+    public Session scheduleSession(SessionRequest sessionRequest) {
+        User admin = userRepository.findById(sessionRequest.getAdminId())
+                .orElseThrow(() -> new RuntimeException("Admin not found"));
+        Availability availability = availabilityRepository.findById(sessionRequest.getAvailabilityId())
+                .orElseThrow(() -> new RuntimeException("Availability not found"));
+
+        // Extract the availability times as LocalTime
+        LocalTime availabilityStartTime = availability.getStartTime();
+        LocalTime availabilityEndTime = availability.getEndTime();
+
+        // Get the session times from the request
+        LocalDateTime sessionStartTime = sessionRequest.getStartTime();
+        LocalDateTime sessionEndTime = sessionRequest.getEndTime();
+
+        // Check if the session times are within the availability period on the same day
+        if (sessionStartTime.toLocalTime().isBefore(availabilityStartTime) ||
+            sessionEndTime.toLocalTime().isAfter(availabilityEndTime)) {
+            throw new RuntimeException("Session times conflict with availability");
+        }
+
+        // Create and save the session
+        Session session = new Session(admin, availability, sessionStartTime, sessionEndTime, sessionRequest.getSessionType());
         return sessionRepository.save(session);
     }
 
+    // Rescheduling a session
+    public Session rescheduleSession(Long sessionId, SessionRequest sessionRequest) {
+        Session session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new RuntimeException("Session not found"));
+
+        session.setStartTime(sessionRequest.getStartTime());
+        session.setEndTime(sessionRequest.getEndTime());
+        session.setSessionType(sessionRequest.getSessionType());
+        return sessionRepository.save(session);
+    }
+
+    // Canceling a session
+    public void cancelSession(Long sessionId) {
+        sessionRepository.deleteById(sessionId);
+    }
+
+    // Get all sessions
     public List<Session> getAllSessions() {
         return sessionRepository.findAll();
     }
 
-    // Conflict checking logic to ensure no overlap with existing sessions or availability
-    public boolean isConflict(LocalDateTime startTime, LocalDateTime endTime, List<User> participants) {
-        List<Session> allSessions = sessionRepository.findAll();
-        for (User participant : participants) {
-            List<Session> userSessions = allSessions.stream()
-                .filter(session -> session.getParticipants().contains(participant))
-                .collect(Collectors.toList());
-            for (Session session : userSessions) {
-                if ((startTime.isBefore(session.getEndTime()) && startTime.isAfter(session.getStartTime())) ||
-                    (endTime.isBefore(session.getEndTime()) && endTime.isAfter(session.getStartTime()))) {
-                    return true;  // Conflict found
-                }
-            }
-        }
-        return false;
+    // Get sessions by user ID (admin in this case)
+    public List<Session> getSessionsByUserId(Long userId) {
+        return sessionRepository.findByAdminId(userId);
     }
-
-    // Add other methods like rescheduling, canceling sessions if required
 }

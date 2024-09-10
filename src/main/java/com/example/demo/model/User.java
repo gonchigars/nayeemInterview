@@ -1,6 +1,19 @@
 package com.example.demo.model;
 
-import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "users")
@@ -10,16 +23,29 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String email;  // Use email as a unique identifier
+    @Column(nullable = false, unique = true)
+    private String email;
 
-    // Constructors
+    // @Column(nullable = false)
+    // private String password;
+
+    @Column(nullable = false)
+    private String role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore  // Prevent recursive serialization of Availability list
+    private List<Availability> availabilityList = new ArrayList<>();
+
+    // Constructors, getters, and setters
+
     public User() {}
 
-    public User(String email) {
+    public User(String email,  String role) {
         this.email = email;
+       // this.password = password;
+        this.role = role;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -34,5 +60,40 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    // public String getPassword() {
+    //     return password;
+    // }
+
+    // public void setPassword(String password) {
+    //     this.password = password;
+    // }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public List<Availability> getAvailabilityList() {
+        return availabilityList;
+    }
+
+    public void setAvailabilityList(List<Availability> availabilityList) {
+        this.availabilityList = availabilityList;
+    }
+
+    // Helper methods for bidirectional relationships
+    public void addAvailability(Availability availability) {
+        availabilityList.add(availability);
+        availability.setUser(this);
+    }
+
+    public void removeAvailability(Availability availability) {
+        availabilityList.remove(availability);
+        availability.setUser(null);
     }
 }
