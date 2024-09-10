@@ -3,14 +3,14 @@ package com.example.demo.dto;
 
 public class LoginRequestDTO {
     private String email;
-    private String password;
+    //private String password;
 
     // Constructors
     public LoginRequestDTO() {}
 
-    public LoginRequestDTO(String email, String password) {
+    public LoginRequestDTO(String email) {
         this.email = email;
-        this.password = password;
+        //this.password = password;
     }
 
     // Getters and Setters
@@ -22,11 +22,11 @@ public class LoginRequestDTO {
         this.email = email;
     }
 
-    public String getPassword() {
+    /*public String getPassword() {
         return password;
     }
 
     public void setPassword(String password) {
         this.password = password;
-    }
+    }*/
 }
