@@ -1,8 +1,11 @@
+// File: src/main/java/com/example/demo/controller/UserController.java
 package com.example.demo.controller;
 
+import com.example.demo.dto.UserDTO;
+import com.example.demo.dto.LoginRequestDTO;
+import com.example.demo.dto.UserResponseDTO;
 import com.example.demo.model.User;
 import com.example.demo.service.UserService;
-import com.example.demo.dto.LoginRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,14 +19,25 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
+    public ResponseEntity<UserResponseDTO> registerUser(@RequestBody UserDTO userDTO) {
+        // Convert UserDTO to User entity
+        User user = new User(userDTO.getEmail(), userDTO.getPassword(), userDTO.getRole());
+
+        // Register the user and get the saved User entity
         User registeredUser = userService.registerUser(user);
-        return ResponseEntity.ok(registeredUser);
+
+        // Convert the User entity to UserResponseDTO and return it
+        UserResponseDTO userResponseDTO = new UserResponseDTO(
+                registeredUser.getId(),
+                registeredUser.getEmail(),
+                registeredUser.getRole()
+        );
+        return ResponseEntity.ok(userResponseDTO);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody LoginRequest loginRequest) {
-        boolean isAuthenticated = userService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
+    public ResponseEntity<String> loginUser(@RequestBody LoginRequestDTO loginRequestDTO) {
+        boolean isAuthenticated = userService.authenticate(loginRequestDTO.getEmail(), loginRequestDTO.getPassword());
         if (isAuthenticated) {
             return ResponseEntity.ok("Login successful");
         } else {
@@ -32,8 +46,11 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
-        return ResponseEntity.ok(user);
+        
+        // Convert the User entity to UserResponseDTO and return it
+        UserResponseDTO userResponseDTO = new UserResponseDTO(user.getId(), user.getEmail(), user.getRole());
+        return ResponseEntity.ok(userResponseDTO);
     }
 }
