@@ -9,9 +9,9 @@ public class UserDTO {
     // Constructors
     public UserDTO() {}
 
-    public UserDTO(String email, String password, String role) {
+    public UserDTO(String email, String role) {
         this.email = email;
-        this.password = password;
+        // this.password = password;
         this.role = role;
     }
 
@@ -24,13 +24,13 @@ public class UserDTO {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
-    }
+    // public String getPassword() {
+    //     return password;
+    // }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    // public void setPassword(String password) {
+    //     this.password = password;
+    // }
 
     public String getRole() {
         return role;
