@@ -1,4 +1,4 @@
-// File: src/main/java/com/example/demo/dto/UserDTO.java
+
 package com.example.demo.dto;
 
 public class UserDTO {
