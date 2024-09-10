@@ -1,46 +1,47 @@
 package com.example.demo.service;
 
-import com.example.demo.model.AvailabilitySlot;
+import com.example.demo.model.Availability;
 import com.example.demo.model.User;
-import com.example.demo.repository.AvailabilitySlotRepository;
+import com.example.demo.repository.AvailabilityRepository;
+import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Optional;
 
 @Service
 public class AvailabilityService {
 
-    // Logger to track events
-    private static final Logger log = LoggerFactory.getLogger(AvailabilityService.class);
+    @Autowired
+    private AvailabilityRepository availabilityRepository;
 
     @Autowired
-    private AvailabilitySlotRepository availabilitySlotRepository;
+    private UserRepository userRepository;
 
-    public AvailabilitySlot createAvailability(User user, LocalDateTime start, LocalDateTime end, int duration) {
-        log.info("Creating availability for user: {}, start: {}, end: {}, duration: {}", user.getEmail(), start, end, duration);
-        
-        AvailabilitySlot slot = new AvailabilitySlot();
-        slot.setUser(user);
-        slot.setStart(start);
-        slot.setEndTime(end);
-        slot.setDuration(duration);
-        
-        return availabilitySlotRepository.save(slot);
+    public Availability addAvailability(Availability availability) {
+        return availabilityRepository.save(availability);
     }
 
-    public List<AvailabilitySlot> getUserAvailability(User user) {
-        return availabilitySlotRepository.findByUser(user);
+    public Availability updateAvailability(Long id, Availability updatedAvailability) {
+        Availability availability = availabilityRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Availability not found"));
+        availability.setDayOfWeek(updatedAvailability.getDayOfWeek());
+        availability.setStartTime(updatedAvailability.getStartTime());
+        availability.setEndTime(updatedAvailability.getEndTime());
+        availability.setIntervalDuration(updatedAvailability.getIntervalDuration());
+        return availabilityRepository.save(availability);
     }
 
     public void deleteAvailability(Long id) {
-        availabilitySlotRepository.deleteById(id);
+        availabilityRepository.deleteById(id);
     }
 
-    public List<AvailabilitySlot> getAllAvailabilities() {
-        return availabilitySlotRepository.findAll();
+    public List<Availability> getAvailabilityByUserId(Long userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            return availabilityRepository.findByUserId(userId);
+        }
+        throw new RuntimeException("User not found");
     }
 }

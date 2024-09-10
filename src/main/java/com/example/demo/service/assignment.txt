@@ -1,0 +1,78 @@
+1. You try to create a new user with an email that already exists in the database.
+2. The method `userRepository.findByEmail(email)` finds a matching user.
+3. The code throws a `RuntimeException("User already exists")`.
+4. This results in a 500 Internal Server Error.
+
+### Solution
+
+To handle this case more gracefully, you can:
+- **Return a custom error response** when a user already exists instead of throwing a generic `RuntimeException`.
+- Use a more appropriate HTTP status code (like 409 Conflict) for this scenario.
+
+Here’s how you can improve the error handling:
+
+### Updated `UserService` Method:
+
+```java
+public User createUser(String email) {
+    // Check if the user already exists
+    if (userRepository.findByEmail(email).isPresent()) {
+        throw new UserAlreadyExistsException("User already exists with email: " + email);
+    }
+
+    // Create and save new user
+    User newUser = new User(email);
+    return userRepository.save(newUser);
+}
+```
+
+### Create a Custom Exception (`UserAlreadyExistsException`):
+
+```java
+public class UserAlreadyExistsException extends RuntimeException {
+    public UserAlreadyExistsException(String message) {
+        super(message);
+    }
+}
+```
+
+### Controller Advice for Handling Exceptions:
+
+You can use `@ControllerAdvice` to handle exceptions globally and return proper error responses.
+
+```java
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)  // Return 409 Conflict status
+    public String handleUserAlreadyExistsException(UserAlreadyExistsException e) {
+        return e.getMessage();
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)  // Return 500 Internal Server Error status for generic issues
+    public String handleRuntimeException(RuntimeException e) {
+        return "Internal server error: " + e.getMessage();
+    }
+}
+```
+
+### Benefits:
+- The custom `UserAlreadyExistsException` will be thrown when a user with the same email is found.
+- `@ControllerAdvice` will catch this exception and return a `409 Conflict` status with a meaningful error message.
+- Other `RuntimeException`s will be handled globally, ensuring more predictable error handling.
+
+### Result:
+Now, when you try to create a user with an existing email, instead of getting a 500 error, you'll receive a proper `409 Conflict` response with a message like:
+
+```
+User already exists with email: testuser@example.com
+```
+
+This way, your API can handle duplicate user creation more gracefully. Let me know if you need further clarification or adjustments!

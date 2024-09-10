@@ -1,18 +1,13 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Session;
-import com.example.demo.model.User;
 import com.example.demo.service.SessionService;
-import com.example.demo.service.UserService;
+import com.example.demo.dto.SessionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/sessions")
@@ -21,36 +16,33 @@ public class SessionController {
     @Autowired
     private SessionService sessionService;
 
-    @Autowired
-    private UserService userService;
-
-    @PostMapping("/create")
-    public ResponseEntity<?> createSession(@RequestBody Map<String, Object> sessionData) {
-        LocalDateTime startTime = LocalDateTime.parse((String) sessionData.get("startTime"));
-        LocalDateTime endTime = LocalDateTime.parse((String) sessionData.get("endTime"));
-        @SuppressWarnings("unchecked")
-        List<String> emails = (List<String>) sessionData.get("participants");
-
-        // Ensure all participants exist, and do not create new users
-        List<User> participants = emails.stream()
-            .map(email -> userService.getUserByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found")))
-            .collect(Collectors.toList());
-
-        // Conflict checking for availability
-        if (sessionService.isConflict(startTime, endTime, participants)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Session conflicts with existing availability or sessions.");
-        }
-
-        // Create the session
-        Session session = sessionService.createSession(startTime, endTime, participants);
+    @PostMapping("/schedule")
+    public ResponseEntity<Session> scheduleSession(@RequestBody SessionRequest sessionRequest) {
+        Session session = sessionService.scheduleSession(sessionRequest);
         return ResponseEntity.ok(session);
     }
 
     @GetMapping("/all")
     public ResponseEntity<List<Session>> getAllSessions() {
-        return ResponseEntity.ok(sessionService.getAllSessions());
+        List<Session> sessions = sessionService.getAllSessions();
+        return ResponseEntity.ok(sessions);
     }
 
-    // Add other endpoints for rescheduling or canceling sessions if needed
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Session>> getUserSessions(@PathVariable Long userId) {
+        List<Session> userSessions = sessionService.getSessionsByUserId(userId);
+        return ResponseEntity.ok(userSessions);
+    }
+
+    @PutMapping("/reschedule/{id}")
+    public ResponseEntity<Session> rescheduleSession(@PathVariable Long id, @RequestBody SessionRequest sessionRequest) {
+        Session updatedSession = sessionService.rescheduleSession(id, sessionRequest);
+        return ResponseEntity.ok(updatedSession);
+    }
+
+    @DeleteMapping("/cancel/{id}")
+    public ResponseEntity<String> cancelSession(@PathVariable Long id) {
+        sessionService.cancelSession(id);
+        return ResponseEntity.ok("Session cancelled successfully");
+    }
 }

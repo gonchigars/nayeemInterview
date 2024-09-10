@@ -2,7 +2,6 @@ package com.example.demo.model;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "sessions")
@@ -12,19 +11,32 @@ public class Session {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "admin_id", nullable = false)
+    private User admin;  // Admin who schedules the session
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "availability_id", nullable = false)
+    private Availability availability;
+
+    @Column(nullable = false)
     private LocalDateTime startTime;
+
+    @Column(nullable = false)
     private LocalDateTime endTime;
 
-    @ManyToMany
-    @JoinTable(
-        name = "session_users",
-        joinColumns = @JoinColumn(name = "session_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private List<User> participants;
+    @Column(nullable = false)
+    private String sessionType;  // 'one-on-one' or 'group'
 
-    // Constructors
     public Session() {}
+
+    public Session(User admin, Availability availability, LocalDateTime startTime, LocalDateTime endTime, String sessionType) {
+        this.admin = admin;
+        this.availability = availability;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.sessionType = sessionType;
+    }
 
     // Getters and Setters
 
@@ -34,6 +46,22 @@ public class Session {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public User getAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(User admin) {
+        this.admin = admin;
+    }
+
+    public Availability getAvailability() {
+        return availability;
+    }
+
+    public void setAvailability(Availability availability) {
+        this.availability = availability;
     }
 
     public LocalDateTime getStartTime() {
@@ -52,11 +80,11 @@ public class Session {
         this.endTime = endTime;
     }
 
-    public List<User> getParticipants() {
-        return participants;
+    public String getSessionType() {
+        return sessionType;
     }
 
-    public void setParticipants(List<User> participants) {
-        this.participants = participants;
+    public void setSessionType(String sessionType) {
+        this.sessionType = sessionType;
     }
 }
