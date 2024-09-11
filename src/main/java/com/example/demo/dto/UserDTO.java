@@ -12,6 +12,7 @@ public class UserDTO {
     public UserDTO(String email,  String role) {
         this.email = email;
         // this.password = password;
+        // modify
         this.role = role;
     }
 
