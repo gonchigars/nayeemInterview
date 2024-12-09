@@ -20,14 +20,19 @@ public class UserService {
     }
 
     // Authenticate a user by email and password
-    public boolean authenticate(String email, String password) {
-        Optional<User> userOptional = userRepository.findByEmail(email);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            return password.equals(user.getPassword());  // Just comparing passwords here
-        }
-        return false;
-    }
+    // public boolean authenticate(String email, String password) {
+    //     Optional<User> userOptional = userRepository.findByEmail(email);
+    //     if (userOptional.isPresent()) {
+    //         User user = userOptional.get();
+    //         return password.equals(user.getPassword());  // Just comparing passwords here
+    //     }
+    //     return false;
+    // }
+// Authenticate a user by email only
+public boolean authenticate(String email) {
+    Optional<User> userOptional = userRepository.findByEmail(email);
+    return userOptional.isPresent();  // Returns true if the user with the given email exists
+}
 
     // Get a user by ID
     public User getUserById(Long id) {
